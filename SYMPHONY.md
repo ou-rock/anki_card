@@ -58,6 +58,7 @@ http://127.0.0.1:8787/api/v1/<issue_identifier>
 - Per-issue workspace isolation with sanitized directory names.
 - Workspace hooks: `after_create`, `before_run`, `after_run`, `before_remove`.
 - Codex app-server JSON-RPC stdio adapter using `initialize`, `thread/start`, and `turn/start`.
+- Codex threads default to `danger-full-access` with turn policy `{ type: "dangerFullAccess" }`. Use this only when issue workspaces are treated as disposable sandboxes.
 - Structured JSON logs.
 - Optional loopback HTTP dashboard and `/api/v1/*` JSON API.
 

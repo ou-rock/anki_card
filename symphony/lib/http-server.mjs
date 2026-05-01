@@ -42,6 +42,15 @@ export function startHttpServer(orchestrator, port, logger) {
     const address = server.address();
     logger.info("http server listening", { port: address.port });
   });
+  server.on("error", (error) => {
+    if (error.code === "EADDRINUSE") {
+      logger.error("http server port is already in use", { port, address: "127.0.0.1" });
+      process.exitCode = 1;
+      return;
+    }
+    logger.error("http server failed", { error: error.message, code: error.code });
+    process.exitCode = 1;
+  });
   return server;
 }
 
