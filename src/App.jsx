@@ -919,13 +919,23 @@ function App() {
   return (
     <main className="app-shell">
       <section className="topbar">
-        <div>
-          <p className="eyebrow">React 本地工具</p>
-          <h1>Anki Card Studio</h1>
+        <div className="brand-lockup">
+          <div className="app-mark">
+            <Icon name="gallery-vertical-end" size={24} />
+          </div>
+          <div>
+            <p className="eyebrow">Anki Workflow</p>
+            <h1>Anki Card Studio</h1>
+          </div>
         </div>
-        <div className="status-pill">
-          <Icon name={ankiState.connected ? "plug-zap" : "circle-dot"} />
-          <span>{status}</span>
+        <div className="topbar-insights">
+          <HeaderStat icon="library" label="本地卡片" value={cards.length} />
+          <HeaderStat icon="check-square" label="选中" value={selectedCards.length || cards.length} />
+          <HeaderStat icon={ankiState.connected ? "wifi" : "wifi-off"} label="Anki" value={ankiState.connected ? "在线" : "离线"} />
+          <div className="status-pill">
+            <Icon name={ankiState.connected ? "plug-zap" : "circle-dot"} />
+            <span>{status}</span>
+          </div>
         </div>
       </section>
 
@@ -1269,6 +1279,16 @@ function App() {
 function Metric({ label, value }) {
   return (
     <div className="metric">
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
+  );
+}
+
+function HeaderStat({ icon, label, value }) {
+  return (
+    <div className="header-stat">
+      <Icon name={icon} size={16} />
       <span>{label}</span>
       <strong>{value}</strong>
     </div>
