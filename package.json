@@ -1,0 +1,14 @@
+{
+  "name": "anki-card-studio",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "symphony": "node symphony/bin/symphony.mjs",
+    "test:symphony": "node --test test/symphony.test.mjs"
+  },
+  "dependencies": {
+    "liquidjs": "^10.21.1",
+    "yaml": "^2.8.1"
+  }
+}
