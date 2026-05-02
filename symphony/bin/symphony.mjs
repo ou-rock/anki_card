@@ -25,7 +25,8 @@ try {
   const orchestrator = new Orchestrator(runtime, logger);
   const config = await runtime.loadInitial();
   const port = args.port !== undefined ? Number(args.port) : config.server.port;
-  if (port !== null && port !== undefined) startHttpServer(orchestrator, port, logger);
+  const host = args.host || config.server.host;
+  if (port !== null && port !== undefined) startHttpServer(orchestrator, port, logger, { host });
 
   process.on("SIGINT", () => {
     logger.info("shutdown requested", { signal: "SIGINT" });
@@ -54,6 +55,8 @@ function parseArgs(argv) {
       result.workflow = argv[++index];
     } else if (arg === "--port") {
       result.port = argv[++index];
+    } else if (arg === "--host") {
+      result.host = argv[++index];
     } else if (arg === "--help" || arg === "-h") {
       printHelp();
       process.exit(0);
@@ -63,7 +66,7 @@ function parseArgs(argv) {
 }
 
 function printHelp() {
-  console.log(`Usage: node symphony/bin/symphony.mjs [start|validate] [--workflow WORKFLOW.md] [--port PORT]
+  console.log(`Usage: node symphony/bin/symphony.mjs [start|validate] [--workflow WORKFLOW.md] [--port PORT] [--host HOST]
 
 Commands:
   start      Start the long-running Symphony service.
@@ -71,6 +74,7 @@ Commands:
 
 Options:
   --workflow PATH  Workflow file path. Defaults to ./WORKFLOW.md.
-  --port PORT      Enable optional HTTP dashboard/API on loopback.
+  --port PORT      Enable optional HTTP dashboard/API on the configured host.
+  --host HOST      HTTP bind address. Use 0.0.0.0 for LAN/mobile access.
 `);
 }

@@ -40,6 +40,9 @@ codex:
   stall_timeout_ms: 300000
 server:
   port: 8787
+  # Keep 127.0.0.1 for local-only access. Use 0.0.0.0 to open the live
+  # dashboard/API to other devices on the same trusted network.
+  host: 127.0.0.1
 ---
 # Work the Linear issue
 

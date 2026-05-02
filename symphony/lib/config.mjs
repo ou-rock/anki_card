@@ -19,6 +19,7 @@ const DEFAULTS = {
   codexTurnTimeoutMs: 3600000,
   codexReadTimeoutMs: 5000,
   codexStallTimeoutMs: 300000,
+  serverHost: "127.0.0.1",
 };
 
 export function resolveConfig(workflow, env = process.env) {
@@ -79,6 +80,7 @@ export function resolveConfig(workflow, env = process.env) {
     },
     server: {
       port: server.port === undefined ? null : integer(server.port, null, "server.port"),
+      host: server.host === undefined ? DEFAULTS.serverHost : String(server.host),
     },
   };
 

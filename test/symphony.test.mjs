@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { once } from "node:events";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -7,6 +8,7 @@ import { parseWorkflowSource, loadWorkflow, renderPrompt } from "../symphony/lib
 import { resolveConfig, validateDispatchConfig } from "../symphony/lib/config.mjs";
 import { workspaceKey, WorkspaceManager } from "../symphony/lib/workspace.mjs";
 import { Orchestrator, sortForDispatch } from "../symphony/lib/orchestrator.mjs";
+import { startHttpServer } from "../symphony/lib/http-server.mjs";
 
 test("workflow parser splits YAML front matter and prompt", () => {
   const workflow = parseWorkflowSource(`---
@@ -41,6 +43,27 @@ Prompt
   validateDispatchConfig(config);
   assert.equal(config.tracker.api_key, "secret");
   assert.equal(config.workspace.root, join(dir, "work"));
+  assert.equal(config.server.host, "127.0.0.1");
+  await rm(dir, { recursive: true, force: true });
+});
+
+test("config resolves a public HTTP bind host", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "symphony-test-"));
+  const path = join(dir, "WORKFLOW.md");
+  await writeFile(path, `---
+tracker:
+  kind: linear
+  api_key: $LINEAR_API_KEY
+  project_slug: demo
+server:
+  port: 8787
+  host: 0.0.0.0
+---
+Prompt
+`);
+  const workflow = await loadWorkflow(path);
+  const config = resolveConfig(workflow, { LINEAR_API_KEY: "secret" });
+  assert.equal(config.server.host, "0.0.0.0");
   await rm(dir, { recursive: true, force: true });
 });
 
@@ -94,4 +117,43 @@ test("orchestrator does not dispatch Todo issues with active blockers", () => {
     blocked_by: [{ state: "In Progress" }],
   };
   assert.equal(orchestrator.shouldDispatch(issue, config), false);
+});
+
+test("http server streams live dashboard state", async (t) => {
+  const snapshot = {
+    generated_at: "2026-05-02T00:00:00.000Z",
+    counts: { running: 1, retrying: 0 },
+    running: [{
+      issue_id: "1",
+      issue_identifier: "ANK-7",
+      state: "In Progress",
+      session_id: "session-1",
+      turn_count: 1,
+      last_event: "turn_started",
+      last_message: "working",
+      started_at: "2026-05-02T00:00:00.000Z",
+      last_event_at: "2026-05-02T00:00:01.000Z",
+      tokens: { input_tokens: 1, output_tokens: 2, total_tokens: 3 },
+    }],
+    retrying: [],
+    codex_totals: { input_tokens: 1, output_tokens: 2, total_tokens: 3, seconds_running: 4 },
+    rate_limits: null,
+    workflow_error: null,
+  };
+  const server = startHttpServer({ snapshot: () => snapshot }, 0, { info() {}, error() {} }, { host: "127.0.0.1" });
+  t.after(() => server.close());
+  await once(server, "listening");
+  const { port } = server.address();
+
+  const state = await fetch(`http://127.0.0.1:${port}/api/v1/state`).then((response) => response.json());
+  assert.equal(state.running[0].issue_identifier, "ANK-7");
+
+  const controller = new AbortController();
+  const response = await fetch(`http://127.0.0.1:${port}/api/v1/events`, { signal: controller.signal });
+  const reader = response.body.getReader();
+  const { value } = await reader.read();
+  controller.abort();
+  const chunk = new TextDecoder().decode(value);
+  assert.match(chunk, /event: state/);
+  assert.match(chunk, /"issue_identifier":"ANK-7"/);
 });

@@ -35,11 +35,18 @@ Start:
 npm run symphony -- start --workflow WORKFLOW.md --port 8787
 ```
 
+Open the dashboard/API to a phone or other device on the same trusted network:
+
+```bash
+npm run symphony -- start --workflow WORKFLOW.md --port 8787 --host 0.0.0.0
+```
+
 Dashboard/API:
 
 ```text
 http://127.0.0.1:8787/
 http://127.0.0.1:8787/api/v1/state
+http://127.0.0.1:8787/api/v1/events
 http://127.0.0.1:8787/api/v1/<issue_identifier>
 ```
 
@@ -60,14 +67,14 @@ http://127.0.0.1:8787/api/v1/<issue_identifier>
 - Codex app-server JSON-RPC stdio adapter using `initialize`, `thread/start`, and `turn/start`.
 - Codex threads default to `danger-full-access` with turn policy `{ type: "dangerFullAccess" }`. Use this only when issue workspaces are treated as disposable sandboxes.
 - Structured JSON logs.
-- Optional loopback HTTP dashboard and `/api/v1/*` JSON API.
+- Optional HTTP dashboard and `/api/v1/*` JSON API with a live `/api/v1/events` Server-Sent Events stream.
 
 ## Implementation-Defined Policy
 
 - Workspace population is delegated to hooks. The service only creates/reuses per-issue directories.
 - The default trust posture is non-interactive. App-server approval/input requests are denied by the adapter unless Codex config avoids generating them.
 - Ticket writes are not built into Symphony. Agents should update Linear through their own configured tools/workflow.
-- The optional HTTP server binds to `127.0.0.1`.
+- The optional HTTP server binds to `127.0.0.1` by default. Set `server.host` or pass `--host 0.0.0.0` for LAN/mobile access on trusted networks.
 - Listener port changes require restart.
 - Existing workspaces are not destructively reset on reuse.
 
