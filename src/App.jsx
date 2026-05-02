@@ -1,8 +1,14 @@
 const { useEffect, useMemo, useState } = React;
 
 const STORAGE_KEY = "anki-card-studio:v1";
-const ANKI_CONNECT_URL = "http://127.0.0.1:8765";
-const OMNIFOCUS_BRIDGE_URL = "http://127.0.0.1:3479";
+const ANKI_CONNECT_URL = (() => {
+  const host = window.location.hostname || "127.0.0.1";
+  return `http://${host}:8765`;
+})();
+const OMNIFOCUS_BRIDGE_URL = (() => {
+  const host = window.location.hostname || "127.0.0.1";
+  return `http://${host}:3479`;
+})();
 
 const initialDraft = {
   deckName: "Default",

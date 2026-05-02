@@ -7,6 +7,7 @@ import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
 const PORT = Number(process.env.OMNIFOCUS_BRIDGE_PORT || 3479);
+const HOST = process.env.OMNIFOCUS_BRIDGE_HOST || "127.0.0.1";
 const STATE_PATH = process.env.OMNIFOCUS_BRIDGE_STATE || join(homedir(), ".anki-card-studio", "omnifocus-sync.json");
 const COMMAND_TIMEOUT_MS = Number(process.env.OMNIFOCUS_COMMAND_TIMEOUT_MS || 20000);
 const managedNote = "Managed by Anki Card Studio";
@@ -308,7 +309,7 @@ const server = createServer(async (request, response) => {
   }
 });
 
-server.listen(PORT, "127.0.0.1", () => {
-  console.log(`OmniFocus bridge listening at http://127.0.0.1:${PORT}`);
+server.listen(PORT, HOST, () => {
+  console.log(`OmniFocus bridge listening at http://${HOST}:${PORT}`);
   console.log(`State file: ${STATE_PATH}`);
 });
