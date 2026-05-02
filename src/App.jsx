@@ -3,11 +3,15 @@ const { useEffect, useMemo, useState } = React;
 const STORAGE_KEY = "anki-card-studio:v1";
 const ANKI_CONNECT_URL = (() => {
   const params = new URLSearchParams(window.location.search);
+  if (params.get("ankiProxy") === "1") return `${window.location.origin}/anki`;
+  if (params.get("ankiUrl")) return params.get("ankiUrl");
   const host = params.get("ankiHost") || window.location.hostname || "127.0.0.1";
   return `http://${host}:8765`;
 })();
 const OMNIFOCUS_BRIDGE_URL = (() => {
   const params = new URLSearchParams(window.location.search);
+  if (params.get("bridgeProxy") === "1") return `${window.location.origin}/omnifocus`;
+  if (params.get("bridgeUrl")) return params.get("bridgeUrl");
   const host = params.get("bridgeHost") || window.location.hostname || "127.0.0.1";
   return `http://${host}:3479`;
 })();

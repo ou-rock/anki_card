@@ -24,7 +24,21 @@ http://192.168.31.106:8787
 
 ## Start Commands
 
-Static Studio server:
+Recommended Studio LAN server:
+
+```bash
+cd /Users/pedan/Desktop/file
+node scripts/lan-server.mjs
+```
+
+Open this URL from the phone so AnkiConnect is proxied through the same
+origin as the page:
+
+```text
+http://192.168.31.106:8000/?ankiProxy=1&bridgeProxy=1
+```
+
+Fallback static server, without AnkiConnect/OmniFocus proxy:
 
 ```bash
 cd /Users/pedan/Desktop/file
